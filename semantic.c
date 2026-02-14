@@ -4560,7 +4560,7 @@ static void ProcessIncbin(SemanticState *state, StatementIncbin *incbin)
 
 		if (value > LONG_MAX)
 		{
-			SemanticError(state, "Start value is too large: it must be less than %lu.", LONG_MAX);
+			SemanticError(state, "Start value is too large: it must be less than %ld.", LONG_MAX);
 			value = 0;
 		}
 
