@@ -480,5 +480,6 @@ int main(int argc, char **argv)
 	if (symbol_file != NULL)
 		fclose(symbol_file);
 
+	if (__lsan_do_recoverable_leak_check() > 0) abort();
 	return exit_code;
 }
