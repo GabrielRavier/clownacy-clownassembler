@@ -5444,7 +5444,7 @@ static cc_bool ParseStatement(SemanticState* const state, Statement* const state
 	{
 		/* Parse the source line with Flex and Bison (Lex and Yacc). */
 		const YY_BUFFER_STATE buffer = m68kasm__scan_bytes(StringView_Data(view), (int)StringView_Length(view), state->flex_state);
-		static const Statement empty_statement;
+		const Statement empty_statement = {(StatementType)0}; /* C++ requires the cast to the enum type. Under C89, we could do `static const Statement empty_statement;` and that would be fine, but that doesn't work under C++ either */
 		int parse_result;
 
 		*statement = empty_statement; /* We need to be able to call DestroyStatement if we fail, even if m68kasm_parse didn't parse shit - without this it would be left uninitialized */
