@@ -545,7 +545,7 @@ static void OutputByte(SemanticState *state, unsigned int byte)
 	}
 
 	/* Write to output file. */
-	OutputWriteSegmentByte(state, byte);
+	OutputWriteSegmentByte(state, (unsigned char)byte);
 }
 
 static cc_bool CurrentlyExpandingMacro(const SemanticState* const state)
@@ -897,11 +897,11 @@ static cc_bool ResolveExpression(SemanticState *state, Expression *expression, u
 						break;
 
 					case EXPRESSION_LOGICAL_OR:
-						*value = left_value != 0 || right_value != 0 ? -1 : 0;
+						*value = left_value != 0 || right_value != 0 ? (unsigned long)-1 : 0;
 						break;
 
 					case EXPRESSION_LOGICAL_AND:
-						*value = left_value != 0 && right_value != 0 ? -1 : 0;
+						*value = left_value != 0 && right_value != 0 ? (unsigned long)-1 : 0;
 						break;
 
 					case EXPRESSION_BITWISE_OR:
@@ -917,27 +917,27 @@ static cc_bool ResolveExpression(SemanticState *state, Expression *expression, u
 						break;
 
 					case EXPRESSION_EQUALITY:
-						*value = left_value == right_value ? -1 : 0;
+						*value = left_value == right_value ? (unsigned long)-1 : 0;
 						break;
 
 					case EXPRESSION_INEQUALITY:
-						*value = left_value != right_value ? -1 : 0;
+						*value = left_value != right_value ? (unsigned long)-1 : 0;
 						break;
 
 					case EXPRESSION_LESS_THAN:
-						*value = left_value < right_value ? -1 : 0;
+						*value = left_value < right_value ? (unsigned long)-1 : 0;
 						break;
 
 					case EXPRESSION_LESS_OR_EQUAL:
-						*value = left_value <= right_value ? -1 : 0;
+						*value = left_value <= right_value ? (unsigned long)-1 : 0;
 						break;
 
 					case EXPRESSION_MORE_THAN:
-						*value = left_value > right_value ? -1 : 0;
+						*value = left_value > right_value ? (unsigned long)-1 : 0;
 						break;
 
 					case EXPRESSION_MORE_OR_EQUAL:
-						*value = left_value >= right_value ? -1 : 0;
+						*value = left_value >= right_value ? (unsigned long)-1 : 0;
 						break;
 
 					/*
@@ -1014,7 +1014,7 @@ static cc_bool ResolveExpression(SemanticState *state, Expression *expression, u
 						break;
 
 					case EXPRESSION_LOGICAL_NOT:
-						*value = *value == 0 ? -1 : 0;
+						*value = *value == 0 ? (unsigned long)-1 : 0;
 						break;
 				}
 
@@ -1052,7 +1052,7 @@ static cc_bool ResolveExpression(SemanticState *state, Expression *expression, u
 				for (i = 0; i < length; ++i)
 				{
 					*value <<= 8;
-					*value |= String_At(&expression->shared.string, i);
+					*value |= (unsigned char)String_At(&expression->shared.string, i);
 				}
 			}
 
@@ -1072,7 +1072,7 @@ static cc_bool ResolveExpression(SemanticState *state, Expression *expression, u
 			break;
 
 		case EXPRESSION_STRCMP:
-			*value = String_Compare(&expression->shared.subexpressions[0].shared.string, &expression->shared.subexpressions[1].shared.string) ? -1 : 0;
+			*value = String_Compare(&expression->shared.subexpressions[0].shared.string, &expression->shared.subexpressions[1].shared.string) ? (unsigned long)-1 : 0;
 			break;
 
 		case EXPRESSION_INSTR:
@@ -1098,7 +1098,7 @@ static cc_bool ResolveExpression(SemanticState *state, Expression *expression, u
 		}
 
 		case EXPRESSION_DEF:
-			*value = LookupSymbol(state, String_View(&expression->shared.string), NULL) != NULL ? -1 : 0;
+			*value = LookupSymbol(state, String_View(&expression->shared.string), NULL) != NULL ? (unsigned long)-1 : 0;
 			break;
 
 		case EXPRESSION_TYPE_WITH_IDENTIFIER:
@@ -1121,10 +1121,19 @@ static cc_bool ResolveExpression(SemanticState *state, Expression *expression, u
 			}
 			else
 			{
+				long ftell_result;
 				fseek(file, 0, SEEK_END);
-				*value = ftell(file);
-
-				fclose(file);
+				ftell_result = ftell(file);
+				if (ftell_result < 0)
+				{
+					success = cc_false;
+					SemanticError(state, "Failed to get size of file '%s'.", file_path);
+				}
+				else
+				{
+					*value = (unsigned long)ftell_result;
+					fclose(file);
+				}
 			}
 
 			break;
@@ -1496,7 +1505,7 @@ static void AddIdentifierToSymbolTable(SemanticState *state, const StringView *l
 
 	if (symbol != NULL)
 	{
-		symbol->type = type;
+		symbol->type = (int)type;
 		symbol->shared.unsigned_long = value;
 	}
 }
@@ -2960,13 +2969,13 @@ static void ProcessInstruction(SemanticState *state, StatementInstruction *instr
 		/* If the size is undefined, and the instruction has only one valid size, then set the size to that. */
 		if (instruction->opcode.size == SIZE_UNDEFINED)
 		{
-			switch (instruction_metadata->allowed_sizes & ~SIZE_UNDEFINED)
+			switch (instruction_metadata->allowed_sizes & (unsigned int)~SIZE_UNDEFINED)
 			{
 				case SIZE_BYTE:
 				case SIZE_SHORT:
 				case SIZE_WORD:
 				case SIZE_LONGWORD:
-					instruction->opcode.size = (Size)(instruction_metadata->allowed_sizes & ~SIZE_UNDEFINED);
+					instruction->opcode.size = (Size)(instruction_metadata->allowed_sizes & (unsigned)~SIZE_UNDEFINED);
 					break;
 			}
 		}
@@ -3252,8 +3261,8 @@ static void ProcessInstruction(SemanticState *state, StatementInstruction *instr
 
 						machine_code = 0x0108;
 						machine_code |= data_register << 9;
-						machine_code |= (instruction->operands[0].type == OPERAND_DATA_REGISTER) << 7;
-						machine_code |= (instruction->opcode.size == SIZE_LONGWORD) << 6;
+						machine_code |= (unsigned)((instruction->operands[0].type == OPERAND_DATA_REGISTER) << 7);
+						machine_code |= (unsigned)((instruction->opcode.size == SIZE_LONGWORD) << 6);
 						machine_code |= address_register;
 
 						break;
@@ -3340,7 +3349,7 @@ static void ProcessInstruction(SemanticState *state, StatementInstruction *instr
 
 					case OPCODE_EXT:
 						machine_code = 0x4880;
-						machine_code |= (instruction->opcode.size == SIZE_LONGWORD) << 6;
+						machine_code |= (unsigned)((instruction->opcode.size == SIZE_LONGWORD) << 6);
 						machine_code |= ConstructEffectiveAddressBits(state, &instruction->operands[0]);
 						break;
 
@@ -3449,7 +3458,7 @@ static void ProcessInstruction(SemanticState *state, StatementInstruction *instr
 					case OPCODE_MOVEM_TO_REGS:
 					case OPCODE_MOVEM_FROM_REGS:
 						machine_code = 0x4880;
-						machine_code |= (instruction->opcode.size == SIZE_LONGWORD) << 6;
+						machine_code |= (unsigned)((instruction->opcode.size == SIZE_LONGWORD) << 6);
 
 						if (instruction->opcode.type == OPCODE_MOVEM_TO_REGS)
 						{
@@ -3869,7 +3878,7 @@ static void ProcessInstruction(SemanticState *state, StatementInstruction *instr
 								break;
 						}
 
-						machine_code |= (instruction->opcode.size == SIZE_LONGWORD) << 8;
+						machine_code |= (unsigned)((instruction->opcode.size == SIZE_LONGWORD) << 8);
 						machine_code |= instruction->operands[1].main_register << 9;
 						machine_code |= ConstructEffectiveAddressBits(state, &instruction->operands[0]);
 
@@ -4424,7 +4433,7 @@ static void ProcessDc(SemanticState *state, StatementDc *dc)
 			size_t i;
 
 			for (i = 0; i < String_Length(&expression_list_node->expression.shared.string); ++i)
-				OutputDcValue(state, dc->size, String_At(&expression_list_node->expression.shared.string, i));
+				OutputDcValue(state, dc->size, (unsigned char)String_At(&expression_list_node->expression.shared.string, i));
 		}
 		else
 		{
@@ -4549,7 +4558,13 @@ static void ProcessIncbin(SemanticState *state, StatementIncbin *incbin)
 			value = 0;
 		}
 
-		if (fseek(input_file, value, SEEK_SET) != 0)
+		if (value > LONG_MAX)
+		{
+			SemanticError(state, "Start value is too large: it must be less than %lu.", LONG_MAX);
+			value = 0;
+		}
+
+		if (fseek(input_file, (long)value, SEEK_SET) != 0)
 			SemanticError(state, "Start value is not a valid location in the file.");
 
 		if (incbin->has_length)
@@ -4574,7 +4589,7 @@ static void ProcessIncbin(SemanticState *state, StatementIncbin *incbin)
 				}
 
 				++state->program_counter;
-				OutputWriteSegmentByte(state, character);
+				OutputWriteSegmentByte(state, (unsigned char)character);
 			}
 		}
 		else
@@ -4585,7 +4600,7 @@ static void ProcessIncbin(SemanticState *state, StatementIncbin *incbin)
 			while ((character = fgetc(input_file)) != EOF)
 			{
 				++state->program_counter;
-				OutputWriteSegmentByte(state, character);
+				OutputWriteSegmentByte(state, (unsigned char)character);
 			}
 		}
 
@@ -5424,25 +5439,29 @@ static void ProcessStatement(SemanticState *state, Statement *statement, const S
 
 static cc_bool ParseStatement(SemanticState* const state, Statement* const statement, const StringView* const view)
 {
-	/* Parse the source line with Flex and Bison (Lex and Yacc). */
-	const YY_BUFFER_STATE buffer = m68kasm__scan_bytes(StringView_Data(view), StringView_Length(view), state->flex_state);
-	const Statement empty_statement = {0};
-	int parse_result;
+	assert(StringView_Length(view) <= INT_MAX);
 
-	*statement = empty_statement; /* We need to be able to call DestroyStatement if we fail, even if m68kasm_parse didn't parse shit - without this it would be left uninitialized */
-	parse_result = m68kasm_parse(state->flex_state, statement);
-	m68kasm__delete_buffer(buffer, state->flex_state);
+	{
+		/* Parse the source line with Flex and Bison (Lex and Yacc). */
+		const YY_BUFFER_STATE buffer = m68kasm__scan_bytes(StringView_Data(view), (int)StringView_Length(view), state->flex_state);
+		static const Statement empty_statement;
+		int parse_result;
 
-	if (parse_result == 0)
-		return cc_true;
+		*statement = empty_statement; /* We need to be able to call DestroyStatement if we fail, even if m68kasm_parse didn't parse shit - without this it would be left uninitialized */
+		parse_result = m68kasm_parse(state->flex_state, statement);
+		m68kasm__delete_buffer(buffer, state->flex_state);
 
-	/* Out of memory. */
-	if (parse_result == 2)
-		OutOfMemoryError(state);
+		if (parse_result == 0)
+			return cc_true;
 
-	/* We need to free `statement`, given that a statement may have been meaningfully formed into it even on error, if e.g. the error was due to trailing garbage on a line */
-	DestroyStatement(statement);
-	return cc_false;
+		/* Out of memory. */
+		if (parse_result == 2)
+			OutOfMemoryError(state);
+
+		/* We need to free `statement`, given that a statement may have been meaningfully formed into it even on error, if e.g. the error was due to trailing garbage on a line */
+		DestroyStatement(statement);
+		return cc_false;
+	}
 }
 
 static void ParseLine(SemanticState* const state, const StringView* const label, const StringView* const directive_and_operands)
@@ -5622,7 +5641,8 @@ static const StringView* MacroCustomSubstituteSearch(void* const user_data, cons
 				if (end == start)
 					continue;
 
-				*found_length = 1 + (end - start);
+				assert(end > start);
+				*found_length = 1 + (size_t)(end - start);
 
 				if (parameter_index >= state->macro.total_arguments)
 				{
@@ -5668,7 +5688,8 @@ static cc_bool FindStringInSourceLine(const String* const string, const size_t s
 	if (end_pointer == NULL)
 		return cc_false;
 
-	StringView_Create(view, start_pointer, end_pointer - start_pointer + 1);
+	assert(end_pointer > start_pointer);
+	StringView_Create(view, start_pointer, (size_t)(end_pointer - start_pointer) + 1);
 	return cc_true;
 }
 
@@ -5694,7 +5715,10 @@ static void PerformSubstitutionsExcludingQuotedStrings(SemanticState* const stat
 			StringView view_to_search;
 			/* Define the region that we will perform substitutions on. */
 			const char* const search_start = &String_At(string, position);
-			const size_t search_length = StringView_Data(&string_in_source_line) - search_start;
+			size_t search_length;
+
+			assert(search_start <= StringView_Data(&string_in_source_line));
+			search_length = (size_t)(StringView_Data(&string_in_source_line) - search_start);
 
 			/* Perform the substitutions. */
 			StringView_Create(&view_to_search, search_start, search_length);
@@ -5813,7 +5837,8 @@ static void InvokeMacro(SemanticState* const state, Macro* const macro, const St
 		while (arguments_string_end > arguments_string_start && (arguments_string_end[-1] == ' ' || arguments_string_end[-1] == '\t'))
 			--arguments_string_end;
 
-		StringView_Create(&closure.arguments, arguments_string_start, arguments_string_end - arguments_string_start);
+		assert(arguments_string_end >= arguments_string_start);
+		StringView_Create(&closure.arguments, arguments_string_start, (size_t)(arguments_string_end - arguments_string_start));
 	}
 
 	closure.label = *label;
@@ -5857,14 +5882,15 @@ static void InvokeMacro(SemanticState* const state, Macro* const macro, const St
 				{
 					/* Extract argument. */
 					StringView argument;
-					StringView_Create(&argument, argument_string_start, source_line_pointer - argument_string_start - 1);
+					assert(source_line_pointer > argument_string_start);
+					StringView_Create(&argument, argument_string_start, (size_t)(source_line_pointer - argument_string_start - 1));
 
 					/* Remove trailing whitespace. */
 					while (StringView_Length(&argument) != 0)
 					{
-						const char character = StringView_Back(&argument);
+						const char last_character = StringView_Back(&argument);
 
-						if (character != ' ' && character != '\t')
+						if (last_character != ' ' && last_character != '\t')
 							break;
 
 						StringView_SubStr(&argument, &argument, 0, StringView_Length(&argument) - 1);
@@ -6016,6 +6042,8 @@ static void AssembleLine(SemanticState *state, const String *source_line_raw, co
 	{
 		state->source_line = source_line_raw;
 	}
+	assert(String_At(state->source_line, String_Length(state->source_line)) == '\0');
+	assert(strlen(String_CStr(state->source_line)) == String_Length(state->source_line));
 
 	++state->location->line_number;
 
@@ -6091,7 +6119,8 @@ static void AssembleLine(SemanticState *state, const String *source_line_raw, co
 	/* Determine the length of the directive. */
 	directive_length = strspn(source_line_pointer, DIRECTIVE_OR_MACRO_CHARS);
 
-	StringView_Create(&directive_and_operands, source_line_pointer, (String_Data(state->source_line) + String_Length(state->source_line)) - source_line_pointer);
+	assert((String_Data(state->source_line) + String_Length(state->source_line)) >= source_line_pointer);
+	StringView_Create(&directive_and_operands, source_line_pointer, (size_t)((String_Data(state->source_line) + String_Length(state->source_line)) - source_line_pointer));
 	StringView_SubStr(&directive, &directive_and_operands, 0, directive_length);
 
 	/* This is either a directive, or a macro. */
@@ -6314,7 +6343,7 @@ static cc_bool DictionaryFilterProduceSymbolFile(Dictionary_Entry *entry, const 
 			BinaryStream_fputc(is_local_label ? 6 : 2, symbol_callbacks);
 
 			/* Output the length of the label. */
-			BinaryStream_fputc(label_length, symbol_callbacks);
+			BinaryStream_fputc((unsigned char)label_length, symbol_callbacks);
 
 			/* Output the label itself. */
 			BinaryStream_fwrite(label, 1, label_length, symbol_callbacks);
@@ -6484,7 +6513,7 @@ static cc_bool ClownAssembler_AssembleToObjectFile(
 						   since they won't be needed anymore. */
 						if (!state.fix_up_needed || state.doing_final_pass)
 						{
-							Location *location;
+							Location *location_iterator;
 
 							*fix_up_pointer = fix_up->next;
 
@@ -6498,14 +6527,14 @@ static cc_bool ClownAssembler_AssembleToObjectFile(
 							String_Destroy(&fix_up->label);
 
 							/* Pop one location from the list. */
-							location = fix_up->location.previous;
+							location_iterator = fix_up->location.previous;
 
-							while (location != NULL)
+							while (location_iterator != NULL)
 							{
-								Location *previous_location = location->previous;
-								String_Destroy(&location->file_path);
-								free(location);
-								location = previous_location;
+								Location *previous_location = location_iterator->previous;
+								String_Destroy(&location_iterator->file_path);
+								free(location_iterator);
+								location_iterator = previous_location;
 							}
 							String_Destroy(&fix_up->location.file_path);
 

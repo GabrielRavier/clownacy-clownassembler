@@ -32,7 +32,7 @@ static const ClownAssembler_TextOutput *error_callbacks;
 static jmp_buf jump_buffer;
 static unsigned char padding_buffer[0x1000];
 static unsigned long maximum_address = 0;
-static unsigned int padding_value = 0;
+static int padding_value = 0;
 
 static unsigned int ReadByte(void)
 {
@@ -109,7 +109,7 @@ static void ProcessSegment(void)
 	{
 		const unsigned long bytes_to_do = CC_MIN(sizeof(copy_buffer), length - i);
 
-		ReadBytes(copy_buffer, bytes_to_do);
+		ReadBytes(copy_buffer, (unsigned int)bytes_to_do);
 		BinaryStream_fwrite(copy_buffer, bytes_to_do, 1, output_file);
 	}
 

@@ -49,7 +49,7 @@ static Dictionary_Bucket* GetBucket(Dictionary_State *state, const StringView *i
 	hash = 5381;
 
 	for (i = 0; i < length; ++i)
-		hash = hash * 33 + tolower(*character++); /* Hash the identifier in lower-case form, so that case-insensitive mode works. */
+		hash = hash * 33 + (unsigned char)tolower(*character++); /* Hash the identifier in lower-case form, so that case-insensitive mode works. */
 
 	return &state->hash_table[hash % TOTAL_HASH_TABLE_ENTRIES];
 }

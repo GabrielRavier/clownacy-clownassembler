@@ -58,6 +58,7 @@ extern int m68kasm_debug;
 
 #include "clowncommon/clowncommon.h"
 #include "string.h"
+#include <limits.h>
 
 /* A hack for older versions of Bison. */
 /* Should probably be removed when they go out of circulation. */
@@ -478,7 +479,7 @@ typedef struct Statement
 } Statement;
 
 
-#line 482 "syntactic.h"
+#line 483 "syntactic.h"
 
 /* Token kinds.  */
 #ifndef M68KASM_TOKENTYPE
@@ -688,7 +689,7 @@ typedef struct Statement
 #if ! defined M68KASM_STYPE && ! defined M68KASM_STYPE_IS_DECLARED
 union M68KASM_STYPE
 {
-#line 483 "syntactic.y"
+#line 484 "syntactic.y"
 
 	unsigned long unsigned_long;
 	String string;
@@ -701,7 +702,7 @@ union M68KASM_STYPE
 	IdentifierList identifier_list;
 	Expression expression;
 
-#line 705 "syntactic.h"
+#line 706 "syntactic.h"
 
 };
 typedef union M68KASM_STYPE M68KASM_STYPE;
@@ -715,7 +716,7 @@ typedef union M68KASM_STYPE M68KASM_STYPE;
 int m68kasm_parse (void *scanner, Statement *statement);
 
 /* "%code provides" blocks.  */
-#line 455 "syntactic.y"
+#line 456 "syntactic.y"
 
 
 void DestroyExpression(Expression *expression);
@@ -723,6 +724,6 @@ void DestroyStatement(Statement *statement);
 void DestroyIdentifierList(IdentifierList *list);
 
 
-#line 727 "syntactic.h"
+#line 728 "syntactic.h"
 
 #endif /* !YY_M68KASM_SYNTACTIC_H_INCLUDED  */

@@ -31,6 +31,7 @@
 
 #include "clowncommon/clowncommon.h"
 #include "string.h"
+#include <limits.h>
 
 /* A hack for older versions of Bison. */
 /* Should probably be removed when they go out of circulation. */
@@ -1766,36 +1767,42 @@ operand
 	: '(' TOKEN_ADDRESS_REGISTER ')'
 	{
 		$$.type = OPERAND_ADDRESS_REGISTER_INDIRECT;
-		$$.main_register = $2;
+		assert($2 <= UINT_MAX);
+		$$.main_register = (unsigned)$2;
 	}
 	| '(' TOKEN_ADDRESS_REGISTER ')' '+'
 	{
 		$$.type = OPERAND_ADDRESS_REGISTER_INDIRECT_POSTINCREMENT;
-		$$.main_register = $2;
+		assert($2 <= UINT_MAX);
+		$$.main_register = (unsigned)$2;
 	}
 	| '-' '(' TOKEN_ADDRESS_REGISTER ')'
 	{
 		$$.type = OPERAND_ADDRESS_REGISTER_INDIRECT_PREDECREMENT;
-		$$.main_register = $3;
+		assert($3 <= UINT_MAX);
+		$$.main_register = (unsigned)$3;
 	}
 	| expression '(' TOKEN_ADDRESS_REGISTER ')'
 	{
 		$$.type = OPERAND_ADDRESS_REGISTER_INDIRECT_WITH_DISPLACEMENT;
 		$$.literal = $1;
-		$$.main_register = $3;
+		assert($3 <= UINT_MAX);
+		$$.main_register = (unsigned)$3;
 	}
 	| '(' expression ',' TOKEN_ADDRESS_REGISTER ')'
 	{
 		$$.type = OPERAND_ADDRESS_REGISTER_INDIRECT_WITH_DISPLACEMENT;
 		$$.literal = $2;
-		$$.main_register = $4;
+		assert($4 <= UINT_MAX);
+		$$.main_register = (unsigned)$4;
 	}
 	| '(' TOKEN_ADDRESS_REGISTER ',' data_or_address_register size ')'
 	{
 		$$.type = OPERAND_ADDRESS_REGISTER_INDIRECT_WITH_DISPLACEMENT_AND_INDEX_REGISTER;
 		$$.literal.type = EXPRESSION_NUMBER;
 		$$.literal.shared.unsigned_long = 0;
-		$$.main_register = $2;
+		assert($2 <= UINT_MAX);
+		$$.main_register = (unsigned)$2;
 		$$.index_register = $4 % 8;
 		$$.size = $5;
 		$$.index_register_is_address_register = $4 / 8 != 0;
@@ -1804,7 +1811,8 @@ operand
 	{
 		$$.type = OPERAND_ADDRESS_REGISTER_INDIRECT_WITH_DISPLACEMENT_AND_INDEX_REGISTER;
 		$$.literal = $1;
-		$$.main_register = $3;
+		assert($3 <= UINT_MAX);
+		$$.main_register = (unsigned)$3;
 		$$.index_register = $5 % 8;
 		$$.size = $6;
 		$$.index_register_is_address_register = $5 / 8 !=0;
@@ -1813,7 +1821,8 @@ operand
 	{
 		$$.type = OPERAND_ADDRESS_REGISTER_INDIRECT_WITH_DISPLACEMENT_AND_INDEX_REGISTER;
 		$$.literal = $2;
-		$$.main_register = $4;
+		assert($4 <= UINT_MAX);
+		$$.main_register = (unsigned)$4;
 		$$.index_register = $6 % 8;
 		$$.size = $7;
 		$$.index_register_is_address_register = $6 / 8 !=0;
@@ -1824,7 +1833,8 @@ operand
 		$$.type = OPERAND_ADDRESS_REGISTER_INDIRECT_WITH_DISPLACEMENT_AND_INDEX_REGISTER;
 		$$.literal.type = EXPRESSION_NUMBER;
 		$$.literal.shared.unsigned_long = 0;
-		$$.main_register = $2;
+		assert($2 <= UINT_MAX);
+		$$.main_register = (unsigned)$2;
 		$$.index_register = $4 % 8;
 		$$.size = SIZE_WORD;
 		$$.index_register_is_address_register = $4 / 8 != 0;
@@ -1834,7 +1844,8 @@ operand
 		m68kasm_warning_pedantic(scanner, statement, "Index register lacks a size specifier (assuming word-size for now, but you should really add an explicit size).");
 		$$.type = OPERAND_ADDRESS_REGISTER_INDIRECT_WITH_DISPLACEMENT_AND_INDEX_REGISTER;
 		$$.literal = $1;
-		$$.main_register = $3;
+		assert($3 <= UINT_MAX);
+		$$.main_register = (unsigned)$3;
 		$$.index_register = $5 % 8;
 		$$.size = SIZE_WORD;
 		$$.index_register_is_address_register = $5 / 8 !=0;
@@ -1844,7 +1855,8 @@ operand
 		m68kasm_warning_pedantic(scanner, statement, "Index register lacks a size specifier (assuming word-size for now, but you should really add an explicit size).");
 		$$.type = OPERAND_ADDRESS_REGISTER_INDIRECT_WITH_DISPLACEMENT_AND_INDEX_REGISTER;
 		$$.literal = $2;
-		$$.main_register = $4;
+		assert($4 <= UINT_MAX);
+		$$.main_register = (unsigned)$4;
 		$$.index_register = $6 % 8;
 		$$.size = SIZE_WORD;
 		$$.index_register_is_address_register = $6 / 8 !=0;
@@ -1980,7 +1992,8 @@ operand
 		{
 			/* This is multiple registers. */
 			$$.type = OPERAND_REGISTER_LIST;
-			$$.main_register = $1; /* Such a hack... */
+			assert($1 <= UINT_MAX);
+			$$.main_register = (unsigned)$1; /* Such a hack... */
 		}
 	}
 	;

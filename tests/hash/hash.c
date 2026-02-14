@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
+#include <assert.h>
 
 #define CLOWNMD5_IMPLEMENTATION
 #define CLOWNMD5_STATIC
@@ -21,7 +23,9 @@ static void HashFile(FILE* const file, Hash hash)
 
 		if (bytes_read != sizeof(buffer))
 		{
-			ClownMD5_PushFinalData(&state, buffer, bytes_read * 8, hash);
+			assert(bytes_read <= sizeof(buffer));
+			assert(bytes_read * 8 <= UINT_MAX);
+			ClownMD5_PushFinalData(&state, buffer, (unsigned)(bytes_read * 8), hash);
 			break;
 		}
 
@@ -56,8 +60,10 @@ static int HashFromString(const char* const string, Hash hash)
 	if (values_read != 16)
 		return 0;
 
-	for (i = 0; i < 16; ++i)
-		hash[i] = values[i];
+	for (i = 0; i < 16; ++i) {
+		assert(values[i] <= UCHAR_MAX);
+		hash[i] = (unsigned char)values[i];
+	}
 
 	return 1;
 }

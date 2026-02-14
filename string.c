@@ -69,11 +69,14 @@ size_t StringView_Find(const StringView* const view, const StringView* const sub
 size_t StringView_FindCharacter(const StringView* const view, const char character, const size_t position)
 {
 	const char* const found_pointer = (const char*)memchr(StringView_Data(view) + position, character, StringView_Length(view) - position);
+	ptrdiff_t result;
 
 	if (found_pointer == NULL)
 		return STRING_POSITION_INVALID;
 
-	return found_pointer - StringView_Data(view);
+	result = found_pointer - StringView_Data(view);
+	assert(result >= 0);
+	return (size_t)result;
 }
 
 void String_CreateBlank(String* const string)
@@ -178,6 +181,7 @@ cc_bool String_Replace(String* const string, const size_t position, const size_t
 		String_Destroy(string);
 		StringView_Create(&string->view, new_buffer, new_length);
 		string->capacity = StringView_Length(&string->view);
+		assert(String_At(string, String_Length(string)) == '\0');
 		return cc_true;
 	}
 }
@@ -241,5 +245,5 @@ void String_ToLower(String* const string)
 	char *string_pointer;
 
 	for (string_pointer = String_CStr(string); *string_pointer != '\0'; ++string_pointer)
-		*string_pointer = tolower(*string_pointer);
+		*string_pointer = (char)tolower(*string_pointer);
 }

@@ -20,6 +20,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
+#include <limits.h>
 
 #include "semantic.h"
 #include "strcmpci.h"
@@ -200,8 +202,10 @@ int main(int argc, char **argv)
 							}
 							else if (tolower(argv[i][0]) == 'l')
 							{
-								const char signifier = tolower(argv[i][1]);
+								char signifier;
 
+								assert(tolower(argv[i][1]) >= SCHAR_MIN && tolower(argv[i][1]) <= SCHAR_MAX);
+								signifier = (char)tolower(argv[i][1]);
 								switch (signifier)
 								{
 									case '+':

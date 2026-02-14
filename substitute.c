@@ -16,11 +16,14 @@
 */
 
 #include "substitute.h"
+#include "clowncommon/clowncommon.h"
 
 #include <ctype.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
+#include <limits.h>
 
 void Substitute_Initialise(Substitute_State* const state)
 {
@@ -171,8 +174,13 @@ void Substitute_ProcessSubString(Substitute_State* const state, Substitute_State
 {
 	size_t starting_position = 0;
 
-	const size_t offset_into_string = StringView_Data(view_to_search) - String_Data(string);
-	const char removed_character = String_At(string, offset_into_string + StringView_Length(view_to_search));
+	const ptrdiff_t offset_into_string_ptrdiff = StringView_Data(view_to_search) - String_Data(string);
+	size_t offset_into_string;
+	char removed_character;
+
+	assert(offset_into_string_ptrdiff >= 0);
+	offset_into_string = (size_t)offset_into_string_ptrdiff;
+	removed_character = String_At(string, offset_into_string + StringView_Length(view_to_search));
 
 	/* Null-terminate the view, so that search logic can use C's silly null-terminated string functions. */
 	String_At(string, offset_into_string + StringView_Length(view_to_search)) = '\0';
@@ -196,8 +204,11 @@ void Substitute_ProcessSubString(Substitute_State* const state, Substitute_State
 		starting_position = found_position + StringView_Length(found_substitute);
 	}
 
-	/* Restore the character that we replaced with a null character earlier. */
-	String_At(string, offset_into_string + StringView_Length(view_to_search)) = removed_character;
+	/* Restore the character that we replaced with a null character earlier, unless this would result in us creating an actual string that isn't 0-terminated */
+	assert(offset_into_string + StringView_Length(view_to_search) <= String_Length(string));
+	if (offset_into_string + StringView_Length(view_to_search) != String_Length(string))
+		String_At(string, offset_into_string + StringView_Length(view_to_search)) = removed_character;
+	assert(String_At(string, String_Length(string)) == '\0');
 }
 
 void Substitute_ProcessString(Substitute_State* const state, Substitute_State* const other_state, String* const string, const Substitute_CustomSearch custom_search_callback, const void* const custom_search_user_data, const cc_bool allow_implicit_matches, const cc_bool case_insensitive)

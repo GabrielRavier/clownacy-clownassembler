@@ -26,20 +26,21 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "syntactic.h"
 
 void m68kasm_warning(void *scanner, Statement *statement, const char *message);
 void m68kasm_error(void *scanner, Statement *statement, const char *message);
 
-static cc_bool CharacterToInteger(unsigned int* const value, const unsigned int character)
+static cc_bool CharacterToInteger(unsigned int* const value, const char character)
 {
 	if (character >= '0' && character <= '9')
-		*value = 0x0 + (character - '0');
+		*value = 0x0 + (unsigned)(character - '0');
 	else if (character >= 'A' && character <= 'Z')
-		*value = 0xA + (character - 'A');
+		*value = 0xA + (unsigned)(character - 'A');
 	else if (character >= 'a' && character <= 'z')
-		*value = 0xA + (character - 'a');
+		*value = 0xA + (unsigned)(character - 'a');
 	else
 		return cc_false;
 
@@ -352,7 +353,8 @@ pc              return TOKEN_PROGRAM_COUNTER;
 
  /* Decimal number. */
 {decimal} {
-	if (!ParseNumber(&yylval->unsigned_long, yyscanner, yytext, yyleng, 10))
+	assert(yyleng >= 1);
+	if (!ParseNumber(&yylval->unsigned_long, yyscanner, yytext, (size_t)yyleng, 10))
 		return M68KASM_error;
 
 	return TOKEN_NUMBER;
@@ -360,7 +362,8 @@ pc              return TOKEN_PROGRAM_COUNTER;
 
  /* Hexadecimal number (68k). */
 \${hexadecimal} {
-	if (!ParseNumber(&yylval->unsigned_long, yyscanner, yytext + 1, yyleng - 1, 16))
+	assert(yyleng >= 1);
+	if (!ParseNumber(&yylval->unsigned_long, yyscanner, yytext + 1, (size_t)(yyleng - 1), 16))
 		return M68KASM_error;
 
 	return TOKEN_NUMBER;
@@ -368,7 +371,8 @@ pc              return TOKEN_PROGRAM_COUNTER;
 
  /* Binary number (68k). */
 \%{binary} {
-	if (!ParseNumber(&yylval->unsigned_long, yyscanner, yytext + 1, yyleng - 1, 2))
+	assert(yyleng >= 1);
+	if (!ParseNumber(&yylval->unsigned_long, yyscanner, yytext + 1, (size_t)(yyleng - 1), 2))
 		return M68KASM_error;
 
 	return TOKEN_NUMBER;
@@ -376,7 +380,8 @@ pc              return TOKEN_PROGRAM_COUNTER;
 
  /* Hexadecimal number (Z80). */
 [0-9]{hexadecimal}?h {
-	if (!ParseNumber(&yylval->unsigned_long, yyscanner, yytext, yyleng - 1, 16))
+	assert(yyleng >= 1);
+	if (!ParseNumber(&yylval->unsigned_long, yyscanner, yytext, (size_t)(yyleng - 1), 16))
 		return M68KASM_error;
 
 	return TOKEN_NUMBER;
@@ -384,7 +389,8 @@ pc              return TOKEN_PROGRAM_COUNTER;
 
  /* Binary number (Z80). */
 {binary}b {
-	if (!ParseNumber(&yylval->unsigned_long, yyscanner, yytext, yyleng - 1, 2))
+	assert(yyleng >= 1);
+	if (!ParseNumber(&yylval->unsigned_long, yyscanner, yytext, (size_t)(yyleng - 1), 2))
 		return M68KASM_error;
 
 	return TOKEN_NUMBER;
@@ -392,7 +398,8 @@ pc              return TOKEN_PROGRAM_COUNTER;
 
  /* Hexadecimal number (C). */
 0x{hexadecimal} {
-	if (!ParseNumber(&yylval->unsigned_long, yyscanner, yytext + 2, yyleng - 2, 16))
+	assert(yyleng >= 2);
+	if (!ParseNumber(&yylval->unsigned_long, yyscanner, yytext + 2, (size_t)(yyleng - 2), 16))
 		return M68KASM_error;
 
 	return TOKEN_NUMBER;
@@ -400,7 +407,8 @@ pc              return TOKEN_PROGRAM_COUNTER;
 
  /* Binary number (GNU C). */
 0b{binary} {
-	if (!ParseNumber(&yylval->unsigned_long, yyscanner, yytext + 2, yyleng - 2, 2))
+	assert(yyleng >= 2);
+	if (!ParseNumber(&yylval->unsigned_long, yyscanner, yytext + 2, (size_t)(yyleng - 2), 2))
 		return M68KASM_error;
 
 	return TOKEN_NUMBER;
@@ -418,7 +426,8 @@ pc              return TOKEN_PROGRAM_COUNTER;
 	/* Escape PATH mode so that the following arguments use the correct rules. */
 	BEGIN(OPERANDS);
 
-	StringView_Create(&view, yytext + 1, yyleng - 2);
+	assert(yyleng >= 2);
+	StringView_Create(&view, yytext + 1, (size_t)(yyleng - 2));
 	String_CreateBlank(&yylval->string);
 
 	if (!String_ResizeNoFill(&yylval->string, StringView_Length(&view)))
@@ -455,7 +464,8 @@ pc              return TOKEN_PROGRAM_COUNTER;
 	/* Escape PATH mode so that the following arguments use the correct rules. */
 	BEGIN(OPERANDS);
 
-	if (!String_Create(&yylval->string, yytext, yyleng))
+	assert(yyleng >= 1);
+	if (!String_Create(&yylval->string, yytext, (size_t)yyleng))
 	{
 		m68kasm_error(yyscanner, NULL, "Could not allocate memory for generic string.");
 		return M68KASM_error;
@@ -469,13 +479,14 @@ pc              return TOKEN_PROGRAM_COUNTER;
 	if (yyleng == 2 && (yytext[0] == 'd' || yytext[0] == 'D' || yytext[0] == 'a' || yytext[0] == 'A') && yytext[1] >= '0' && yytext[1] <= '7')
 	{
 		/* Data register or address register. */
-		yylval->unsigned_long = yytext[1] - '0';
+		yylval->unsigned_long = (unsigned long)(yytext[1] - '0');
 		return yytext[0] == 'd' || yytext[0] == 'D' ? TOKEN_DATA_REGISTER : TOKEN_ADDRESS_REGISTER;
 	}
 	else
 	{
 		/* Identifier. */
-		if (!String_Create(&yylval->string, yytext, yyleng))
+		assert(yyleng >= 1);
+		if (!String_Create(&yylval->string, yytext, (size_t)yyleng))
 		{
 			m68kasm_error(yyscanner, NULL, "Could not allocate memory for generic string.");
 			return M68KASM_error;
@@ -487,7 +498,8 @@ pc              return TOKEN_PROGRAM_COUNTER;
 
  /* Local label. */
 [@\.][A-Za-z_0-9\?]+ {
-	if (!String_Create(&yylval->string, yytext, yyleng))
+	assert(yyleng >= 2);
+	if (!String_Create(&yylval->string, yytext, (size_t)yyleng))
 	{
 		m68kasm_error(yyscanner, NULL, "Could not allocate memory for generic string.");
 		return M68KASM_error;
@@ -498,7 +510,8 @@ pc              return TOKEN_PROGRAM_COUNTER;
 
  /* Option. */
 <OPTIONS>[^ \t\r\n,]+ {
-	if (!String_Create(&yylval->string, yytext, yyleng))
+	assert(yyleng >= 1);
+	if (!String_Create(&yylval->string, yytext, (size_t)yyleng))
 	{
 		m68kasm_error(yyscanner, NULL, "Could not allocate memory for generic string.");
 		return M68KASM_error;
