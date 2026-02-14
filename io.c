@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
 #include "io.h"
 
@@ -29,7 +30,8 @@ typedef ClownAssembler_BinaryStream BinaryStream;
 
 static char* File_ReadLine(void* const user_data, char* const buffer, const size_t buffer_size)
 {
-	return fgets(buffer, buffer_size, (FILE*)user_data);
+	int fgets_buffer_size = buffer_size > INT_MAX ? INT_MAX : (int)buffer_size;
+	return fgets(buffer, fgets_buffer_size, (FILE*)user_data);
 }
 
 static void File_Seek(void* const user_data, const size_t position)
@@ -133,7 +135,7 @@ static void Memory_WriteCharacters(void* const user_data, const void* const char
 
 static void Memory_WriteCharacter(void* const user_data, const int character)
 {
-	const unsigned char byte = character;
+	const unsigned char byte = (unsigned char)character;
 	Memory_WriteCharacters(user_data, &byte, 1);
 }
 

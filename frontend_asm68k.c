@@ -123,7 +123,7 @@ int main(int argc, char **argv)
 				case 'j':
 					/* Skip argument. */
 					++i;
-					/* Fallthrough */
+					__attribute__((fallthrough));
 				case 'c':
 				case 'd':
 				case 'g':

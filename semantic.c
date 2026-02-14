@@ -1409,7 +1409,7 @@ static unsigned int ConstructEffectiveAddressBits(SemanticState *state, const Op
 				case SIZE_BYTE:
 				case SIZE_SHORT:
 					SemanticError(state, "Absolute address can only be word- or longword-sized.");
-					/* Fallthrough */
+					__attribute__((fallthrough));
 				case SIZE_UNDEFINED:
 				case SIZE_LONGWORD:
 					xn = 1; /* 001 */
@@ -3003,7 +3003,6 @@ static void ProcessInstruction(SemanticState *state, StatementInstruction *instr
 						default:
 						case OPERAND_NONE:
 							assert(cc_false);
-							/* Fallthrough */
 						case OPERAND_DATA_REGISTER:
 							operand_string = "a data register";
 							break;
@@ -4221,7 +4220,7 @@ static void ProcessInstruction(SemanticState *state, StatementInstruction *instr
 						case OPERAND_PROGRAM_COUNTER_WITH_DISPLACEMENT_AND_INDEX_REGISTER:
 							/* Turn the address into a displacement. */
 							value -= state->program_counter;
-							/* Fallthrough */
+							__attribute__((fallthrough));
 						case OPERAND_ADDRESS_REGISTER_INDIRECT_WITH_DISPLACEMENT_AND_INDEX_REGISTER:
 							bytes_to_write = 2;
 
@@ -4245,7 +4244,7 @@ static void ProcessInstruction(SemanticState *state, StatementInstruction *instr
 
 						case OPERAND_PROGRAM_COUNTER_WITH_DISPLACEMENT:
 							value -= state->program_counter;
-							/* Fallthrough */
+							__attribute__((fallthrough));
 						case OPERAND_ADDRESS_REGISTER_INDIRECT_WITH_DISPLACEMENT:
 							bytes_to_write = 2;
 
