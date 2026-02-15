@@ -1353,6 +1353,8 @@ static unsigned int ConstructEffectiveAddressBits(SemanticState *state, const Op
 	switch (operand->type)
 	{
 		default:
+			assert(cc_false);
+
 		case OPERAND_NONE:
 			assert(cc_false);
 			m = 0;
@@ -1411,6 +1413,8 @@ static unsigned int ConstructEffectiveAddressBits(SemanticState *state, const Op
 			switch (operand->size)
 			{
 				default:
+					assert(cc_false);
+
 				case SIZE_WORD:
 					xn = 0; /* 000 */
 					break;
@@ -1704,35 +1708,27 @@ static void ResolveInstructionAmbiguity(SemanticState* const state, StatementIns
 						{
 							case OPCODE_ASL_STATIC:
 								ALIAS_AND_LOOP(OPCODE_ASL_DYNAMIC)
-								break;
 
 							case OPCODE_ASR_STATIC:
 								ALIAS_AND_LOOP(OPCODE_ASR_DYNAMIC)
-								break;
 
 							case OPCODE_LSL_STATIC:
 								ALIAS_AND_LOOP(OPCODE_LSL_DYNAMIC)
-								break;
 
 							case OPCODE_LSR_STATIC:
 								ALIAS_AND_LOOP(OPCODE_LSR_DYNAMIC)
-								break;
 
 							case OPCODE_ROXL_STATIC:
 								ALIAS_AND_LOOP(OPCODE_ROXL_DYNAMIC)
-								break;
 
 							case OPCODE_ROXR_STATIC:
 								ALIAS_AND_LOOP(OPCODE_ROXR_DYNAMIC)
-								break;
 
 							case OPCODE_ROL_STATIC:
 								ALIAS_AND_LOOP(OPCODE_ROL_DYNAMIC)
-								break;
 
 							case OPCODE_ROR_STATIC:
 								ALIAS_AND_LOOP(OPCODE_ROR_DYNAMIC)
-								break;
 
 							default:
 								break;
@@ -1755,35 +1751,27 @@ static void ResolveInstructionAmbiguity(SemanticState* const state, StatementIns
 						{
 							case OPCODE_ASL_STATIC:
 								ALIAS_AND_LOOP(OPCODE_ASL_SINGLE)
-								break;
 
 							case OPCODE_ASR_STATIC:
 								ALIAS_AND_LOOP(OPCODE_ASR_SINGLE)
-								break;
 
 							case OPCODE_LSL_STATIC:
 								ALIAS_AND_LOOP(OPCODE_LSL_SINGLE)
-								break;
 
 							case OPCODE_LSR_STATIC:
 								ALIAS_AND_LOOP(OPCODE_LSR_SINGLE)
-								break;
 
 							case OPCODE_ROXL_STATIC:
 								ALIAS_AND_LOOP(OPCODE_ROXL_SINGLE)
-								break;
 
 							case OPCODE_ROXR_STATIC:
 								ALIAS_AND_LOOP(OPCODE_ROXR_SINGLE)
-								break;
 
 							case OPCODE_ROL_STATIC:
 								ALIAS_AND_LOOP(OPCODE_ROL_SINGLE)
-								break;
 
 							case OPCODE_ROR_STATIC:
 								ALIAS_AND_LOOP(OPCODE_ROR_SINGLE)
-								break;
 
 							default:
 								break;
@@ -3012,6 +3000,7 @@ static void ProcessInstruction(SemanticState *state, StatementInstruction *instr
 						default:
 						case OPERAND_NONE:
 							assert(cc_false);
+
 						case OPERAND_DATA_REGISTER:
 							operand_string = "a data register";
 							break;
