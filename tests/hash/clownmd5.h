@@ -112,15 +112,12 @@ static void ClownMD5_ProcessBlock(ClownMD5_State *state, const unsigned char blo
 
 	unsigned long A, B, C, D;
 
-	unsigned long X[16];
+	unsigned long X[16] = {0};
 
 	/* Copy block into X, converting it from an array of bytes to an array of 32-bit words. */
 	for (i = 0; i < 16; ++i)
 	{
 		unsigned int j;
-
-		X[i] = 0;
-
 		for (j = 0; j < 4; ++j)
 			X[i] |= (unsigned long)block[i * 4 + j] << (8 * j);
 	}
