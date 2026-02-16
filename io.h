@@ -63,6 +63,7 @@ void TextInput_CloseFile(const ClownAssembler_TextInput *callbacks);
 char* TextInput_fgets(char *buffer, size_t buffer_size, const ClownAssembler_TextInput *callbacks);
 
 void TextOutput_OpenFILE(ClownAssembler_TextOutput *callbacks, FILE *file);
+__attribute__((pure))
 cc_bool TextOutput_exists(const ClownAssembler_TextOutput *callbacks);
 void TextOutput_vfprintf(const ClownAssembler_TextOutput *callbacks, const char *format, va_list args);
 CC_ATTRIBUTE_PRINTF(2, 3) void TextOutput_fprintf(const ClownAssembler_TextOutput *callbacks, const char *format, ...);
@@ -74,6 +75,7 @@ cc_bool BinaryStream_OpenFile(ClownAssembler_BinaryStream *callbacks, const char
 void BinaryStream_CloseFile(const ClownAssembler_BinaryStream *callbacks);
 cc_bool BinaryStream_OpenMemory(ClownAssembler_BinaryStream *callbacks);
 void BinaryStream_CloseMemory(ClownAssembler_BinaryStream *callbacks);
+__attribute__((pure))
 cc_bool BinaryStream_exists(const ClownAssembler_BinaryStream *callbacks);
 void BinaryStream_fseek(const ClownAssembler_BinaryStream *callbacks, size_t position);
 #define BinaryStream_rewind(CALLBACKS) BinaryStream_fseek(CALLBACKS, 0)

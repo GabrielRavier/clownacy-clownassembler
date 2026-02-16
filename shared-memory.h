@@ -8,6 +8,7 @@
 void* SharedMemory_Allocate(size_t size);
 void SharedMemory_Free(void *memory);
 void* SharedMemory_Copy(void *memory);
+__attribute__((pure))
 cc_bool SharedMemory_WillBeDestroyed(void *memory);
 
 #endif /* SHARED_MEMORY_H */

@@ -23,8 +23,10 @@
 typedef int (*MemoryComparisionFunction)(const void *lhs, const void *rhs, size_t count);
 
 #define strcmpci(lhs, rhs) strncmpci(lhs, rhs, (size_t)-1)
+__attribute__((pure))
 int strncmpci(const char *lhs, const char *rhs, size_t count);
 
+__attribute__((pure))
 int memcasecmp(const void *lhs, const void *rhs, size_t count);
 
 #endif /* STRCMPCI_H */

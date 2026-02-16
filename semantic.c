@@ -381,6 +381,7 @@ static void* MallocAndHandleError(SemanticState *state, size_t size)
 	return memory;
 }
 
+__attribute__((const))
 static unsigned int GetDecimalIntegerStringLength(unsigned long integer)
 {
 	unsigned int string_length;
@@ -396,6 +397,7 @@ static unsigned int GetDecimalIntegerStringLength(unsigned long integer)
 	return string_length;
 }
 
+__attribute__((const))
 static unsigned int GetHexadecimalIntegerStringLength(unsigned long integer)
 {
 	unsigned int string_length;
@@ -1326,6 +1328,7 @@ static void TerminateWhile(SemanticState *state)
 	state->source_line = old_source_line;
 }
 
+__attribute__((const))
 static unsigned int ConstructSizeBits(Size size)
 {
 	switch (size)

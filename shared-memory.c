@@ -15,6 +15,7 @@ typedef struct Header
 	} u;
 } Header;
 
+__attribute__((const))
 static Header* GetHeader(void* const memory)
 {
 	return (Header*)memory - 1;

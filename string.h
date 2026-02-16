@@ -45,9 +45,12 @@ void StringView_Create(StringView *view, const char *source_buffer, size_t sourc
 #define StringView_Length(VIEW) ((VIEW)->length)
 #define StringView_Empty(VIEW) (StringView_Length(VIEW) == 0)
 #define StringView_At(VIEW, INDEX) StringView_Data(VIEW)[INDEX]
+__attribute__((pure))
 cc_bool StringView_Compare(const StringView *view, const StringView *other_view);
+__attribute__((pure))
 cc_bool StringView_CompareCStrCaseInsensitive(const StringView *view, const char *c_string);
 size_t StringView_Find(const StringView *view, const StringView *sub_view, size_t position, cc_bool case_insensitive);
+__attribute__((pure))
 size_t StringView_FindCharacter(const StringView *view, char character, size_t position);
 #define StringView_SubStr(VIEW, OTHER_VIEW, POSITION, LENGTH) StringView_Create(VIEW, &StringView_At(OTHER_VIEW, POSITION), LENGTH)
 #define StringView_Front(VIEW) StringView_At(VIEW, 0)
