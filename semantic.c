@@ -3381,7 +3381,7 @@ static void ProcessInstruction(SemanticState *state, StatementInstruction *instr
 						if (value > 15)
 							SemanticError(state, "The vector cannot be higher than 15.");
 						else
-							machine_code |= value;
+							machine_code |= (unsigned)value;
 
 						/* The operand is embedded directly into the machine code, so we don't need to output it separately. */
 						operands_to_output[0] = NULL;
@@ -3469,13 +3469,17 @@ static void ProcessInstruction(SemanticState *state, StatementInstruction *instr
 						/* Convert lone registers to register_lists. */
 						if (custom_operands[0].type == OPERAND_DATA_REGISTER)
 						{
+							int tmp = 1 << (0 + custom_operands[0].main_register);
+							assert(tmp >= 0);
 							custom_operands[0].type = OPERAND_REGISTER_LIST;
-							custom_operands[0].main_register = 1 << (0 + custom_operands[0].main_register);
+							custom_operands[0].main_register = (unsigned)tmp;
 						}
 						else if (custom_operands[0].type == OPERAND_ADDRESS_REGISTER)
 						{
+							int tmp = 1 << (8 + custom_operands[0].main_register);
+							assert(tmp >= 0);
 							custom_operands[0].type = OPERAND_REGISTER_LIST;
-							custom_operands[0].main_register = 1 << (8 + custom_operands[0].main_register);
+							custom_operands[0].main_register = (unsigned)tmp;
 						}
 
 						if (operands_to_output[1]->type == OPERAND_ADDRESS_REGISTER_INDIRECT_PREDECREMENT)

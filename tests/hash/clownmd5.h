@@ -238,6 +238,7 @@ CLOWNMD5_API void ClownMD5_PushData(ClownMD5_State *state, const unsigned char d
 CLOWNMD5_API void ClownMD5_PushFinalData(ClownMD5_State *state, unsigned char data[16 * 4], unsigned int bits, unsigned char hash[16])
 {
 	unsigned int i, j;
+	int tmp;
 
 	state->total_bits += bits;
 
@@ -252,8 +253,8 @@ CLOWNMD5_API void ClownMD5_PushFinalData(ClownMD5_State *state, unsigned char da
 
 	/* Insert the termination bit at the end of the block's data. */
 	/* While we're doing this, pad to the next byte. */
-	data[i] &= ~((1 << (7 - (bits & 7) + 1)) - 1); /* Clear the spare bits. */
-	data[i] |= 1 << (7 - (bits & 7)); /* Set the first bit after the data. */
+	data[i] &= (unsigned char)~((1 << (7 - (bits & 7) + 1)) - 1); /* Clear the spare bits. */
+	data[i] |= (unsigned char)(1 << (7 - (bits & 7))); /* Set the first bit after the data. */
 
 	++i;
 
