@@ -117,7 +117,7 @@ int main(const int argc, char** const argv)
 // Extension or C99, so since we compile with -ansi we need to declare those ourselves here
 FILE *fmemopen(void *buf, size_t size, const char *mode);
 int snprintf(char *str, size_t size, const char *format, ...);
-size_t strnlen(const char s[.maxlen], size_t maxlen);
+size_t strnlen(const char *s, size_t maxlen);
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
