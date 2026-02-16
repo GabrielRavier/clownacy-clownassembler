@@ -50,7 +50,7 @@ extern "C" {
 
 /*
  * Initialises the MD5 hasher's state.
- * 
+ *
  * Parameters:
  *   state - A pointer to the ClownMD5_State to inititalise.
  */
@@ -58,7 +58,7 @@ CLOWNMD5_API void ClownMD5_Init(ClownMD5_State *state);
 
 /*
  * Processes 512 bits of the to-be-hashed data.
- * 
+ *
  * Parameters:
  *   state - A pointer to the ClownMD5_State representing the current hash.
  *   data  - A pointer to an array of 64 chars, containing the 512 bits that are to be processed. Each char should contain 8 bits.
@@ -67,7 +67,7 @@ CLOWNMD5_API void ClownMD5_PushData(ClownMD5_State *state, const unsigned char d
 
 /*
  * Processes the final bits of the to-be-hashed data and outputs an MD5 hash.
- * 
+ *
  * Parameters:
  *   state - A pointer to the ClownMD5_State representing the current hash.
  *   data  - A pointer to an array of chars, containing the bits that are to be processed. Each char should contain 8 bits, except for the final char which should contain 8 or fewer.

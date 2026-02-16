@@ -36,7 +36,7 @@ typedef struct Dictionary_Entry
 		long signed_long;
 		void *pointer;
 		String string;
-	} shared; 
+	} shared;
 } Dictionary_Entry;
 
 typedef struct Dictionary_Node

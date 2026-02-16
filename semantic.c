@@ -5353,7 +5353,7 @@ static void ProcessStatement(SemanticState *state, Statement *statement, const S
 					;
 				else
 					SemanticWarning(state, "Unrecognised option '%s'.", String_CStr(&option->identifier));
-			}			
+			}
 
 			break;
 		}
